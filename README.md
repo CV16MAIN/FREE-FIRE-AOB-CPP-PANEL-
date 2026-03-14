@@ -1,37 +1,41 @@
-🕵️‍♂️ Free Fire UB Scanner & Replacer
-A Beginner's Gateway to Windows Memory Manipulation
-📝 Project Overview
-This is a basic educational tool created by cv16 to demonstrate how UB (Utility Byte) Injection works. This project was built as a passion project to provide a clear, simplified view of how memory manipulation functions within the Windows environment.
+# 🕵️‍♂️ Free Fire UB Scanner & Replacer
+### *A Beginner's Gateway to Windows Memory Manipulation*
 
-The goal is to show that interacting with a process's memory isn't "magic"—it is a logical sequence of API calls. It is designed specifically for beginners in Computer Science who want to start their journey with the Windows API.
+## 📝 Project Overview
+This is a basic educational tool created by **cv16** to demonstrate how **UB (Utility Byte) Injection** works. This project was built as a passion project to provide a clear, simplified view of how memory manipulation functions within the Windows environment. 
 
-💡 Developer's Note
-"I created this to give a basic understanding of how memory manipulation works. It is actually pretty easy to build something like this once you understand the core flow. This is a fun project meant to help you get a better view of how low-level software interaction works." — cv16
+The goal is to show that interacting with a process's memory isn't "magic"—it is a logical sequence of API calls. It is designed specifically for beginners in Computer Science who want to start their journey with the **Windows API**.
 
-🛠️ Technical Definitions
-To understand this project, you should be familiar with these three core concepts:
+---
 
-AoB (Array of Bytes): A specific sequence of numbers (hexadecimal) that represents a piece of code or data inside the game’s memory. We treat this like a "fingerprint" to find what we want to change.
+## 💡 Developer's Note
+> "I created this to give a basic understanding of how memory manipulation works. It is actually pretty easy to build something like this once you understand the core flow. This is a fun project meant to help you get a better view of how low-level software interaction works." — **cv16**
 
-Process Handle: A temporary token or "key" granted by Windows that allows our program to communicate with another running application (like an emulator).
+---
 
-Memory Paging: Memory is divided into "pages." We use VirtualQueryEx to find "Committed" pages—areas that are actually in use—so we don't try to scan empty space.
+## 🛠️ Technical Definitions
+To understand this project, you should be familiar with these core concepts:
 
-🚀 How the Injection Works
+* **AoB (Array of Bytes):** A specific sequence of numbers (hexadecimal) that represents a piece of code or data. We treat this like a "digital fingerprint."
+* **Process Handle:** A temporary token or "key" granted by Windows that allows our program to communicate with another running application.
+* **Memory Paging:** Memory is divided into "pages." We use `VirtualQueryEx` to find "Committed" pages—areas that are actually in use—so we don't try to scan empty space.
+
+---
+
+## 🚀 How the Injection Works
 The logic follows a simple four-step process:
 
-Process Attachment: We use OpenProcess with PROCESS_VM_READ and WRITE permissions.
+1.  **Process Attachment:** We use `OpenProcess` to get permission to read and write.
+2.  **Memory Mapping:** The program loops through the target's memory using `VirtualQueryEx`. 
+3.  **Pattern Matching:** We "photocopy" memory chunks into a buffer and use `std::search` to find our AoB signature.
+4.  **The Swap:** Once found, we calculate the exact address and use `WriteProcessMemory` to inject the new bytes.
 
-Memory Mapping: The program loops through the target's memory using VirtualQueryEx.
+---
 
-Pattern Matching: We "photocopy" memory chunks into a std::vector and use std::search to find our AoB signature.
+## 💻 Code Architecture
+The core logic is wrapped in a high-performance loop that ensures every valid memory region is checked:
 
-The Swap: Once the "fingerprint" is found, we calculate the exact address and use WriteProcessMemory to inject the new bytes.
-
-💻 Code Architecture
-The core logic is wrapped in a high-performance while loop that ensures every valid memory region is checked:
-
-C++
+```cpp
 while (VirtualQueryEx(hdplayerSnapshot, currectAddress, &membi, sizeof(membi))) {
     if (membi.State == MEM_COMMIT) {
         // Create a local buffer (The "Photocopy")
@@ -51,12 +55,3 @@ while (VirtualQueryEx(hdplayerSnapshot, currectAddress, &membi, sizeof(membi))) 
     }
     currectAddress += membi.RegionSize; // Move to the next block
 }
-⚠️ Requirements
-Administrator Privileges: You must run the compiled .exe as an Admin so Windows allows the memory access.
-
-C++17 or Higher: Uses modern C++ features like auto and std::vector.
-
-Visual Studio: Recommended for easy compilation with the Windows SDK.
-
-📜 Disclaimer
-This project is for educational purposes only. It is a fun, simplified look at memory manipulation to help students and beginners understand the power of the Windows API. Use it responsibly and for learning!
